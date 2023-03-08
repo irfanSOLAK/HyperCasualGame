@@ -19,13 +19,13 @@ public class ObstacleMovement : MonoBehaviour
     public enum Postion_Movement_Type
     {
         [InspectorName("X Axis")]
-        ON_X_AXÝS,
+        ON_X_AXIS,
 
         [InspectorName("Y Axis")]
-        ON_Y_AXÝS,
+        ON_Y_AXIS,
 
         [InspectorName("Z Axis")]
-        ON_Z_AXÝS,
+        ON_Z_AXIS,
     }
 
     public GameObject targetGameObject;
@@ -63,21 +63,21 @@ public class ObstacleMovement : MonoBehaviour
     {
         switch (positionMovement)
         {
-            case Postion_Movement_Type.ON_X_AXÝS:
+            case Postion_Movement_Type.ON_X_AXIS:
                 targetGameObject.transform.ChangeLocalPositionX(Mathf.Lerp(
                     movementLimitsOnSelectedAxis.x,
                     movementLimitsOnSelectedAxis.y,
                     Mathf.PingPong(Time.time * obstacleSpeed, 1.0f)));
                 break;
 
-            case Postion_Movement_Type.ON_Y_AXÝS:
+            case Postion_Movement_Type.ON_Y_AXIS:
                 targetGameObject.transform.ChangeLocalPositionY(Mathf.Lerp(
                     movementLimitsOnSelectedAxis.x,
                     movementLimitsOnSelectedAxis.y,
                     Mathf.PingPong(Time.time * obstacleSpeed, 1.0f)));
                 break;
 
-            case Postion_Movement_Type.ON_Z_AXÝS:
+            case Postion_Movement_Type.ON_Z_AXIS:
                 targetGameObject.transform.ChangeLocalPositionZ(Mathf.Lerp(
                     movementLimitsOnSelectedAxis.x,
                     movementLimitsOnSelectedAxis.y,
