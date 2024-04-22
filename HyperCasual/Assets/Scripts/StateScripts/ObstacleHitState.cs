@@ -12,7 +12,7 @@ public class ObstacleHitState : MonoBehaviour, IPlayerState
             _playerController = playerController;
 
         _playerController.CharacterForwardSpeed = 0;
-        StartCoroutine(StartGame());
+        StartCoroutine(RestartGameAfterDelay());
     }
 
     public void DeactivateState()
@@ -20,7 +20,7 @@ public class ObstacleHitState : MonoBehaviour, IPlayerState
         _playerController = null;
     }
 
-    IEnumerator StartGame()
+    IEnumerator RestartGameAfterDelay()
     {
         yield return new WaitForSeconds(0.1f);
         _playerController.StartRunning();

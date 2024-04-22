@@ -4,120 +4,57 @@ using UnityEngine;
 
 public class AI : MonoBehaviour, IPlayerInput
 {
-    public int numberOfRays = 7;
-    public float rayLength = 1;
+    [SerializeField] int numberOfRays = 7;
+    [SerializeField] float rayLength = 1;
+    [SerializeField] Vector3 rayOffset;
 
-    public Vector3 rayOffset;
-    Vector3 rayStartingPosition;
+    const int MoveLeftValue = -1;
+    const int MoveRightValue = 1;
+    const int NoMovement = 0;
 
-    const int _leftMovement = -1;
-    const int _rightMovement = 1;
-    const int _noMovement = 0;
+    const float UpperMovementLimit = 0.9f;
+    const float LowerMovementLimit = 0.5f;
+    float movementLimit = 1f;
 
-    float _movementLimitsScaleUpper = 9 / 10f;
-    float _movementLimitsScaleLower = 5 / 10f;
-    float _movementLimitsScale = 1f;
+    private AIInputHelper inputHelper;
+    private Vector2 characterXAxisLimits;
+    private void OnEnable()
+    {
+        inputHelper = new AIInputHelper(transform, numberOfRays, rayLength, rayOffset);
+        characterXAxisLimits = GameBehaviour.Instance.GameParameters.characterXAxisLimits;
+    }
 
     public float GiveInput()
     {
-        DetectObjects(out float moveLeft, out float moveRight);
+        inputHelper.DetectObjects(out float moveLeft, out float moveRight);
         return DecideMovement(moveLeft, moveRight);
-    }
-
-    private void DetectObjects(out float moveLeft, out float moveRight)
-    {
-        float rayAngle = 90;
-        rayStartingPosition = transform.position + rayOffset;
-        moveLeft = 0;
-        moveRight = 0;
-        RaycastHit hit;
-
-        for (int i = 0; i < numberOfRays; i++)
-        {
-            rayAngle = 90 - i * 180 / (numberOfRays - 1);
-
-            if (Physics.Raycast(rayStartingPosition, Quaternion.AngleAxis(rayAngle, transform.up) * transform.forward, out hit, rayLength))
-            {
-                Debug.DrawLine(rayStartingPosition, hit.point, Color.green);
-
-                if (hit.collider.transform.IsChildOf(GameObject.FindGameObjectWithTag("Obstacles").GetComponent<Transform>()))
-                {
-                    if (rayAngle <= 0)
-                    {
-                        moveRight++;
-                    }
-
-                    if (rayAngle >= 0)
-                    {
-                        moveLeft++;
-                    }
-                }
-
-                if (hit.collider.transform.IsChildOf(GameObject.FindGameObjectWithTag("PlayersParent").GetComponent<Transform>()))
-                {
-                    if (rayAngle <= 0)
-                    {
-                        moveRight += 0.5f;
-                    }
-
-                    if (rayAngle >= 0)
-                    {
-                        moveLeft += 0.5f;
-                    }
-                }
-            }
-        }
     }
 
     private float DecideMovement(float moveLeft, float moveRight)
     {
-        if (moveRight != moveLeft)
-        {
-            if (moveRight > moveLeft)
-            {
-                if (gameObject.transform.position.x >= GameBehaviour.Instance.GameParameters.characterXAxisLimits.y * _movementLimitsScale)
-                {
-                    _movementLimitsScale = _movementLimitsScaleLower;
-                    return _leftMovement;
-
-                }
-                else
-                {
-                    _movementLimitsScale = _movementLimitsScaleUpper;
-                    return _rightMovement;
-                }
-            }
-            else
-            {
-                if (gameObject.transform.position.x <= GameBehaviour.Instance.GameParameters.characterXAxisLimits.x * _movementLimitsScale)
-                {
-                    _movementLimitsScale = _movementLimitsScaleLower;
-                    return _rightMovement;
-                }
-                else
-                    _movementLimitsScale = _movementLimitsScaleUpper;
-                {
-                    return _leftMovement;
-                }
-
-            }
-        }
-        else if (moveRight != 0)
-        {
-            if (transform.position.x >= 0)
-            {
-                return _leftMovement;
-            }
-            else
-            {
-                return _rightMovement;
-            }
-        }
-        else
-        {
-            return _noMovement;
-        }
+        return (moveRight != moveLeft) ? ChooseDirectionBasedOnObstacles(moveLeft, moveRight) : (moveRight != 0) ? MoveTowardsCenter() : NoMovement;
     }
+
+    private float ChooseDirectionBasedOnObstacles(float moveLeft, float moveRight)
+    {
+        return moveRight > moveLeft ? SelectDirectionBasedOnUpperLimit() : SelectDirectionBasedOnLowerLimit();
+    }
+
+    private float SelectDirectionBasedOnUpperLimit()
+    {
+        movementLimit = (transform.position.x >= characterXAxisLimits.y * movementLimit) ? LowerMovementLimit : UpperMovementLimit;
+        return (movementLimit == LowerMovementLimit) ? MoveLeftValue : MoveRightValue;
+    }
+    private float SelectDirectionBasedOnLowerLimit()
+    {
+        movementLimit = (transform.position.x <= characterXAxisLimits.x * movementLimit) ? LowerMovementLimit : UpperMovementLimit;
+        return (movementLimit == LowerMovementLimit) ? MoveRightValue : MoveLeftValue;
+    }
+    private float MoveTowardsCenter()
+    {
+        return transform.position.x >= 0 ? MoveLeftValue : MoveRightValue;
+    }
+
 
     private void OnDrawGizmosSelected()
     {
@@ -127,6 +64,62 @@ public class AI : MonoBehaviour, IPlayerInput
             Quaternion rayRotation = Quaternion.AngleAxis(90 - i * 180 / (numberOfRays - 1), transform.up);
             Vector3 direction = characterRotation * rayRotation * Vector3.forward;
             Gizmos.DrawRay(transform.position + rayOffset, rayLength * direction);
+        }
+    }
+}
+
+class AIInputHelper
+{
+    private Transform transform;
+    private int numberOfRays;
+    private float rayLength;
+    private Vector3 rayOffset;
+
+    private Transform obstacleParentTransform;
+    private Transform playersParentTransform;
+
+    Vector3 rayStartingPosition;
+
+    const float obstacleMovementWeight = 1f;
+    const float playerMovementWeight = 0.5f;
+
+    public AIInputHelper(Transform transform, int numberOfRays, float rayLength, Vector3 rayOffset)
+    {
+        this.transform = transform;
+        this.numberOfRays = numberOfRays;
+        this.rayLength = rayLength;
+        this.rayOffset = rayOffset;
+
+        obstacleParentTransform = GameObject.FindGameObjectWithTag("Obstacles").GetComponent<Transform>();
+        playersParentTransform = GameObject.FindGameObjectWithTag("PlayersParent").GetComponent<Transform>();
+
+    }
+
+    public void DetectObjects(out float moveLeft, out float moveRight)
+    {
+        rayStartingPosition = transform.position + rayOffset;
+        moveLeft = 0;
+        moveRight = 0;
+
+        for (int i = 0; i < numberOfRays; i++)
+        {
+            float rayAngle = 90 - i * 180 / (numberOfRays - 1);
+            var direction = Quaternion.AngleAxis(rayAngle, transform.up) * transform.forward;
+
+            if (Physics.Raycast(rayStartingPosition, direction, out RaycastHit hit, rayLength))
+            {
+                Debug.DrawLine(rayStartingPosition, hit.point, Color.green);
+                var hitTransform = hit.collider.transform;
+
+                if (hitTransform.IsChildOf(obstacleParentTransform))
+                {
+                    _ = rayAngle <= 0 ? moveRight += obstacleMovementWeight : moveLeft += obstacleMovementWeight;
+                }
+                else if (hitTransform.IsChildOf(playersParentTransform))
+                {
+                    _ = rayAngle <= 0 ? moveRight += playerMovementWeight : moveLeft += playerMovementWeight;
+                }
+            }
         }
     }
 }

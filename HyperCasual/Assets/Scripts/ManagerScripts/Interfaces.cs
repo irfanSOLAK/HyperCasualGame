@@ -6,7 +6,7 @@ public interface IPlayerState
 
 public interface IListener
 {
-    void OnEventOccured(NotificationManager.EVENT_TYPE eventName, float parameter = 0);
+    void OnEventOccured(Game_Events eventName, float parameter = 0);
 }
 
 public interface IPlayerInput

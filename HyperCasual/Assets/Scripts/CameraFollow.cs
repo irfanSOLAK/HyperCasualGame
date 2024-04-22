@@ -10,10 +10,13 @@ public class CameraFollow : Listener
 
     private bool _isFollowingTarget;
 
+    NotificationManager notification;
+
     private void Awake()
     {
         SetCameraParameters();
         transform.position = _cameraStartingPosition;
+        notification = GameBehaviour.Instance.Notifications;
     }
 
     private void SetCameraParameters()
@@ -38,16 +41,16 @@ public class CameraFollow : Listener
         return _isFollowingTarget ? _targetToFollow.position + _cameraToTargetDistance : _cameraStartingPosition;
     }
 
-    public override void AddEventListeners()
+    public override void AddThisToEventListener()
     {
-        GameBehaviour.Instance.Notifications.AddListener(NotificationManager.EVENT_TYPE.Countdown, this);
-        GameBehaviour.Instance.Notifications.AddListener(NotificationManager.EVENT_TYPE.FinishRunning, this);
+        notification.AddListener(Game_Events.Countdown, this);
+        notification.AddListener(Game_Events.FinishRunning, this);
     }
 
-    public override void RemoveEventListeners()
+    public override void RemoveThisFromEventListener()
     {
-        GameBehaviour.Instance.Notifications.RemoveListener(NotificationManager.EVENT_TYPE.Countdown, this);
-        GameBehaviour.Instance.Notifications.RemoveListener(NotificationManager.EVENT_TYPE.FinishRunning, this);
+        notification.RemoveListener(Game_Events.Countdown, this);
+        notification.RemoveListener(Game_Events.FinishRunning, this);
     }
 
     public void Countdown(float parameter = 0)

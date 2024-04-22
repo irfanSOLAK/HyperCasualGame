@@ -47,7 +47,7 @@ public class GameStarter : MonoBehaviour
 
     private void PostPaintWall()
     {
-        GameBehaviour.Instance.Notifications.PostNotification(NotificationManager.EVENT_TYPE.PaintWall, 0);
+        GameBehaviour.Instance.Notifications.PostNotification(Game_Events.PaintWall, 0);
     }
 
     IEnumerator GivePaintingGameInfoForSeconds(int seconds)
@@ -82,7 +82,7 @@ public class GameStarter : MonoBehaviour
 
     private void PostCountdown()
     {
-        GameBehaviour.Instance.Notifications.PostNotification(NotificationManager.EVENT_TYPE.Countdown);
+        GameBehaviour.Instance.Notifications.PostNotification(Game_Events.Countdown);
     }
 
     IEnumerator CountdownCoroutine(int seconds)
@@ -105,7 +105,7 @@ public class GameStarter : MonoBehaviour
 
     private void PostStartRace()
     {
-        GameBehaviour.Instance.Notifications.PostNotification(NotificationManager.EVENT_TYPE.StartRunning);
+        GameBehaviour.Instance.Notifications.PostNotification(Game_Events.StartRunning);
     }
 
     #endregion

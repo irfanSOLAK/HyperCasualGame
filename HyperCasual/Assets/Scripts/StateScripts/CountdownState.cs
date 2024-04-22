@@ -18,10 +18,10 @@ public class CountdownState : MonoBehaviour, IPlayerState
 
     private void StartIdleAnimationAtRandomTime()
     {
-        if (!gameObject.CompareTag("Player"))
+        if (!CompareTag("Player"))
         {
-            float randomNumber = Random.Range(0, 1f);
-            GetComponent<Animator>().SetFloat("AnimationStartTime", randomNumber);
+            float animationStartTime = Random.Range(0, 1f);
+            GetComponent<Animator>().SetFloat("AnimationStartTime", animationStartTime);
         }
     }
 

@@ -138,14 +138,19 @@ public class PaintState : MonoBehaviour, IPlayerState
 
     private IEnumerator WritePercentWithAnimation(bool isPlayingAnimation)
     {
+        float startScale = 1f;
+        float endScale = 1.2f;
+        float scaleIncrement = 0.05f;
+        float scaleSpeed = 0.01f;
+
         if (isPlayingAnimation)
         {
             Text percentText = GameObject.FindGameObjectWithTag("PercentText").GetComponent<Text>();
 
-            for (float i = 1f; i < 1.2f; i += 0.05f)
+            for (float i = startScale; i < endScale; i += scaleIncrement)
             {
                 percentText.rectTransform.localScale = new Vector3(i, i, i);
-                yield return new WaitForSeconds(0.01f);
+                yield return new WaitForSeconds(scaleSpeed);
             }
 
             percentText.rectTransform.localScale = new Vector3(1f, 1f, 1f);

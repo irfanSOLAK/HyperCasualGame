@@ -11,7 +11,7 @@ public class PlayerController : Listener
     public IPlayerState countdownState, runningStartState, obstacleHitState, runningFinishState, paintState;
     [HideInInspector] public Vector3 characterStartingPosition;
     Animator _characterAnimator;
-
+    NotificationManager notification;
     public IPlayerState CurrentState
     {
         get { return _gameStateManager.CurrentState; }
@@ -49,6 +49,7 @@ public class PlayerController : Listener
     {
         SetCharacterParameters();
         AwakeGameStateManager();
+        notification = GameBehaviour.Instance.Notifications;
     }
 
     private void SetCharacterParameters()
@@ -75,20 +76,21 @@ public class PlayerController : Listener
         _gameStateManager.DeactivatePreviousState();
     }
 
-    public override void AddEventListeners()
+    public override void AddThisToEventListener()
     {
-        GameBehaviour.Instance.Notifications.AddListener(NotificationManager.EVENT_TYPE.Countdown, this);
-        GameBehaviour.Instance.Notifications.AddListener(NotificationManager.EVENT_TYPE.StartRunning, this);
-        GameBehaviour.Instance.Notifications.AddListener(NotificationManager.EVENT_TYPE.FinishRunning, this);
-        GameBehaviour.Instance.Notifications.AddListener(NotificationManager.EVENT_TYPE.PaintWall, this);
+
+        notification.AddListener(Game_Events.Countdown, this);
+        notification.AddListener(Game_Events.StartRunning, this);
+        notification.AddListener(Game_Events.FinishRunning, this);
+        notification.AddListener(Game_Events.PaintWall, this);
     }
 
-    public override void RemoveEventListeners()
+    public override void RemoveThisFromEventListener()
     {
-        GameBehaviour.Instance.Notifications.RemoveListener(NotificationManager.EVENT_TYPE.Countdown, this);
-        GameBehaviour.Instance.Notifications.RemoveListener(NotificationManager.EVENT_TYPE.StartRunning, this);
-        GameBehaviour.Instance.Notifications.RemoveListener(NotificationManager.EVENT_TYPE.FinishRunning, this);
-        GameBehaviour.Instance.Notifications.RemoveListener(NotificationManager.EVENT_TYPE.PaintWall, this);
+        notification.RemoveListener(Game_Events.Countdown, this);
+        notification.RemoveListener(Game_Events.StartRunning, this);
+        notification.RemoveListener(Game_Events.FinishRunning, this);
+        notification.RemoveListener(Game_Events.PaintWall, this);
     }
 
     public void Countdown(float parameter = 0)

@@ -11,20 +11,20 @@ using UnityEngine;
 /// </summary>
 public abstract class Listener : MonoBehaviour, IListener
 {
-    public abstract void AddEventListeners();
-    public abstract void RemoveEventListeners();
+    public abstract void AddThisToEventListener();
+    public abstract void RemoveThisFromEventListener();
 
     public virtual void OnEnable()
     {
-        AddEventListeners();
+        AddThisToEventListener();
     }
 
     public virtual void OnDisable()
     {
-        RemoveEventListeners();
+        RemoveThisFromEventListener();
     }
 
-    public void OnEventOccured(NotificationManager.EVENT_TYPE eventName, float parameter = 0)
+    public void OnEventOccured(Game_Events eventName, float parameter = 0)
     {
         Type thisType = this.GetType();
         MethodInfo theMethod = thisType.GetMethod(eventName.ToString());

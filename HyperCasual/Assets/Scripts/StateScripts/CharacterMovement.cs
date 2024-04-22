@@ -5,16 +5,16 @@ using UnityEngine;
 public class CharacterMovement : MonoBehaviour, IPlayerState
 {
     private PlayerController _playerController;
+    private Rigidbody _rigidbody;
 
-    private float _characterHorizontalSpeed;
-    private float _characterXAxisDisplacement;
-    private Vector2 _characterXAxisLimits;
+    private IPlayerInput _movementController;
 
-    private float _characterXAxisNextPosition;
+    private float _horizontalSpeed;
+    private float _xAxisDisplacement;
+    private float _xAxisNextPosition;
 
-    private IPlayerInput _characterMovementController;
+    private Vector2 _xAxisLimits;
 
-    private Rigidbody _characterRigidbody;
 
     public void Handle(PlayerController playerController)
     {
@@ -22,34 +22,38 @@ public class CharacterMovement : MonoBehaviour, IPlayerState
             _playerController = playerController;
 
         SetCharacterMovementParameters();
-        SetMovementController();
+        SetInputController();
     }
 
     private void SetCharacterMovementParameters()
     {
-        _characterRigidbody = GetComponent<Rigidbody>();
-        _playerController.CharacterForwardSpeed = GameBehaviour.Instance.GameParameters.characterForwardSpeed;
-        _characterHorizontalSpeed = GameBehaviour.Instance.GameParameters.characterHorizontalSpeed;
-        _characterXAxisDisplacement = GameBehaviour.Instance.GameParameters.characterXAxisDisplacement;
-        _characterXAxisLimits = GameBehaviour.Instance.GameParameters.characterXAxisLimits;
+        _rigidbody = GetComponent<Rigidbody>();
+        var parameters = GameBehaviour.Instance.GameParameters;
+        _playerController.CharacterForwardSpeed = parameters.characterForwardSpeed;
+        _horizontalSpeed = parameters.characterHorizontalSpeed;
+        _xAxisDisplacement = parameters.characterXAxisDisplacement;
+        _xAxisLimits = parameters.characterXAxisLimits;
     }
 
-    void SetMovementController()
+    void SetInputController()
     {
-        if (gameObject.CompareTag("Player"))
-        {
-            if (gameObject.GetComponent<RunningGameInputUI>() == null)
-                gameObject.AddComponent<RunningGameInputUI>();
+        _movementController = CompareTag("Player") ? GetRunningGameInputUI() : GetAIInput();
+    }
 
-            _characterMovementController = gameObject.GetComponent<RunningGameInputUI>();
-        }
-        else
-        {
-            if (gameObject.GetComponent<AI>() == null)
-                gameObject.AddComponent<AI>();
+    IPlayerInput GetRunningGameInputUI()
+    {
+        if (gameObject.GetComponent<RunningGameInputUI>() == null)
+            gameObject.AddComponent<RunningGameInputUI>();
 
-            _characterMovementController = gameObject.GetComponent<AI>();
-        }
+        return GetComponent<RunningGameInputUI>();
+    }
+
+    IPlayerInput GetAIInput()
+    {
+        if (gameObject.GetComponent<AI>() == null)
+            gameObject.AddComponent<AI>();
+
+        return GetComponent<AI>();
     }
 
     public void DeactivateState()
@@ -62,15 +66,14 @@ public class CharacterMovement : MonoBehaviour, IPlayerState
     {
         if (_playerController)
         {
-            CalculateCharacterXAxisNextPosition(_characterMovementController.GiveInput());
+            CalculateCharacterXAxisNextPosition(_movementController.GiveInput());
         }
     }
 
-    private void CalculateCharacterXAxisNextPosition(float newXPos)
+    private void CalculateCharacterXAxisNextPosition(float input)
     {
-        _characterXAxisNextPosition = Mathf.Clamp(transform.position.x + newXPos * _characterXAxisDisplacement,
-        _characterXAxisLimits.x,
-        _characterXAxisLimits.y);
+        float newXPos = transform.position.x + input * _xAxisDisplacement;
+        _xAxisNextPosition = Mathf.Clamp(newXPos, _xAxisLimits.x, _xAxisLimits.y);
     }
 
     private void FixedUpdate()
@@ -82,10 +85,12 @@ public class CharacterMovement : MonoBehaviour, IPlayerState
     }
     private void Move()
     {
-        _characterRigidbody.MovePosition(
-            new Vector3(Mathf.Lerp(transform.position.x, _characterXAxisNextPosition, _characterHorizontalSpeed * Time.fixedDeltaTime),
+        Vector3 newPosition = new Vector3(
+            Mathf.Lerp(transform.position.x, _xAxisNextPosition, _horizontalSpeed * Time.fixedDeltaTime),
             transform.position.y,
-            transform.position.z + _playerController.CharacterForwardSpeed * Time.fixedDeltaTime)
-            );
+            transform.position.z + _playerController.CharacterForwardSpeed * Time.fixedDeltaTime);
+
+        _rigidbody.MovePosition(newPosition);
+
     }
 }

@@ -6,9 +6,9 @@ using UnityEditor;
 public class ObstacleMovementInpectorGUI : Editor
 {
     GameObject targetGameObject;
-    ObstacleMovement.Movement_Type movementOn;
+    Movement_Type movementOn;
     float obstacleSpeed;
-    ObstacleMovement.Postion_Movement_Type positionMovement;
+    Postion_Movement_Type positionMovement;
     Vector2 movementLimitsOnSelectedAxis;
     Vector3 axesRototationValues;
 
@@ -28,21 +28,21 @@ public class ObstacleMovementInpectorGUI : Editor
             typeof(GameObject),
             true);
 
-        movementOn = (ObstacleMovement.Movement_Type)EditorGUILayout.EnumPopup(
+        movementOn = (Movement_Type)EditorGUILayout.EnumPopup(
             new GUIContent("Movement Type", "Set the GameObject's movement type."),
             obstacleMovement.movementOn);
 
         switch (obstacleMovement.movementOn)
         {
-            case ObstacleMovement.Movement_Type.ON_POSITION:
+            case Movement_Type.ON_POSITION:
                 OnPositionGUI(obstacleMovement);
                 break;
 
-            case ObstacleMovement.Movement_Type.ON_ROTATION:
+            case Movement_Type.ON_ROTATION:
                 OnRotationGUI(obstacleMovement);
                 break;
 
-            case ObstacleMovement.Movement_Type.ON_BOTH:
+            case Movement_Type.ON_BOTH:
                 OnPositionGUI(obstacleMovement);
                 OnRotationGUI(obstacleMovement);
                 break;
@@ -67,7 +67,7 @@ public class ObstacleMovementInpectorGUI : Editor
 
     private void OnPositionGUI(ObstacleMovement obstacleMovement)
     {
-        positionMovement = (ObstacleMovement.Postion_Movement_Type)EditorGUILayout.EnumPopup(
+        positionMovement = (Postion_Movement_Type)EditorGUILayout.EnumPopup(
             new GUIContent("Move On", "The position movement axis."),
             obstacleMovement.positionMovement);
 
