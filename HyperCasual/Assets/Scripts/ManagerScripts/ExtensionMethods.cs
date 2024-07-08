@@ -24,9 +24,9 @@ public static class ExtensionMethods
     /// </summary>
     public static Vector3 ChangeLocalPositionY(this Transform transform, float y)
     {
-        Vector3 position = transform.position;
+        Vector3 position = transform.localPosition;
         position.y = y;
-        transform.position = position;
+        transform.localPosition = position;
         return position;
     }
 
@@ -36,9 +36,9 @@ public static class ExtensionMethods
     /// </summary>
     public static Vector3 ChangeLocalPositionZ(this Transform transform, float z)
     {
-        Vector3 position = transform.position;
+        Vector3 position = transform.localPosition;
         position.z = z;
-        transform.position = position;
+        transform.localPosition = position;
         return position;
     }
 }
